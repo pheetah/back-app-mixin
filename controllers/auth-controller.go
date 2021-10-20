@@ -61,3 +61,67 @@ func (c Controller) SignUp(db *sql.DB) http.HandlerFunc {
 		utils.ResponseJSON(w, user)
 	}
 }
+
+func (c Controller) LogIn(db *sql.DB) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fmt.Println("login invoked!")
+
+		var user models.User
+		var jwt models.JWT
+		var error models.Error
+		var response models.LoginResponse
+
+		json.NewDecoder(r.Body).Decode(&user)
+
+		if user.Email == "" {
+			error.Message = "Email is missing"
+			utils.RespondWithError(w, http.StatusBadRequest, error)
+			return
+		}
+
+		if user.Password == "" {
+			error.Message = "Password is missing"
+			utils.RespondWithError(w, http.StatusBadRequest, error)
+			return
+		}
+
+		password := user.Password
+
+		userRepo := userRepository.UserRepository{}
+		user, err := userRepo.LogIn(db, user)
+
+		if err != nil {
+			if err == sql.ErrNoRows {
+				error.Message = "The user does not exist"
+				utils.RespondWithError(w, http.StatusBadRequest, error)
+				return
+			} else {
+				log.Fatal(err)
+			}
+		}
+
+		hashedPassword := user.Password
+
+		err = bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
+
+		if err != nil {
+			error.Message = "Invalid Password"
+			utils.RespondWithError(w, http.StatusUnauthorized, error)
+			return
+		}
+
+		token, err := utils.GenerateToken(user)
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		w.WriteHeader(http.StatusOK)
+		jwt.Token = token
+
+		response.JWT = jwt.Token
+		response.ClientType = user.ClientType
+
+		utils.ResponseJSON(w, response)
+	}
+}

@@ -25,6 +25,7 @@ func main() {
 
 	r := mux.NewRouter()
 	r.HandleFunc("/signup", controllerIns.SignUp(db)).Methods("POST")
+	r.HandleFunc("/login", controllerIns.LogIn(db)).Methods("POST")
 
 	fmt.Println("hello")
 

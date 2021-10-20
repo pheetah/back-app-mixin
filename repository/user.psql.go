@@ -27,7 +27,7 @@ func (u UserRepository) SignUp(db *sql.DB, user models.User) models.User {
 
 func (u UserRepository) LogIn(db *sql.DB, user models.User) (models.User, error) {
 	row := db.QueryRow("select * from users where email=$1", user.Email)
-	err := row.Scan(&user.ID, &user.Email, &user.Password)
+	err := row.Scan(&user.ID, &user.Email, &user.Password, &user.ClientType)
 
 	if err != nil {
 		return user, err
