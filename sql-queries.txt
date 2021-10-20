@@ -1,0 +1,8 @@
+create table users(
+ id serial primary key,
+ email text not null unique,
+ password text not null,
+ clientType text not null
+);
+
+insert into users (email, password, clientType) values ('testexample@test.com', '12345', 'basic')
