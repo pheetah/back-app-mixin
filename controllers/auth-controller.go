@@ -1,15 +1,19 @@
 package controller
 
 import (
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"strings"
 
 	"github.com/eyupfatihersoy/app-tryout-1/models"
 	userRepository "github.com/eyupfatihersoy/app-tryout-1/repository"
 	"github.com/eyupfatihersoy/app-tryout-1/utils"
+	"github.com/golang-jwt/jwt"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -124,4 +128,64 @@ func (c Controller) LogIn(db *sql.DB) http.HandlerFunc {
 
 		utils.ResponseJSON(w, response)
 	}
+}
+
+func (c Controller) TokenVerifyMiddleWare(next http.HandlerFunc) http.HandlerFunc {
+	fmt.Println("Token Middleware invoked!")
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var errorObject models.Error
+		authHeader := r.Header.Get("Authorization")
+		bearerToken := strings.Split(authHeader, " ")
+		var email models.EmailType
+
+		if len(bearerToken) == 2 {
+			authToken := bearerToken[1]
+
+			token, error := jwt.Parse(authToken, func(token *jwt.Token) (interface{}, error) {
+				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+					return nil, fmt.Errorf("there was an error")
+				}
+
+				return []byte(os.Getenv("SECRET")), nil
+			})
+
+			claims, _ := token.Claims.(jwt.MapClaims)
+
+			for key, val := range claims {
+				if key == "email" {
+					if str, ok := val.(string); ok {
+						/* act on str */
+						email = models.EmailType(str)
+						fmt.Println(email)
+					} else {
+						/* not string */
+					}
+
+				} else {
+					_ = val
+					_ = email
+				}
+			}
+
+			if error != nil {
+				errorObject.Message = error.Error()
+				utils.RespondWithError(w, http.StatusUnauthorized, errorObject)
+				return
+			}
+
+			if token.Valid {
+				ctx := context.WithValue(r.Context(), models.ContextKey, email)
+				next.ServeHTTP(w, r.WithContext(ctx))
+			} else {
+				errorObject.Message = error.Error()
+				utils.RespondWithError(w, http.StatusUnauthorized, errorObject)
+				return
+			}
+
+		} else {
+			errorObject.Message = "invalid token."
+			utils.RespondWithError(w, http.StatusUnauthorized, errorObject)
+			return
+		}
+	})
 }

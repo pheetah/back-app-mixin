@@ -26,6 +26,7 @@ func main() {
 	r := mux.NewRouter()
 	r.HandleFunc("/signup", controllerIns.SignUp(db)).Methods("POST")
 	r.HandleFunc("/login", controllerIns.LogIn(db)).Methods("POST")
+	r.HandleFunc("/protected", controllerIns.TokenVerifyMiddleWare(controllerIns.ProtectedEndPoint())).Methods("GET")
 
 	fmt.Println("hello")
 
