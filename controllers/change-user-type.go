@@ -12,11 +12,20 @@ import (
 func (c Controller) ChangeUserType(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("user-type-changer service invoked!")
+		var changeUserType models.ChangeUserType
 
-		var clientType models.ClientType
-		_ = clientType
+		var clientType models.ChangeUserTypeBody
 
+		userEmail := r.Context().Value(models.ContextKey)
 		json.NewDecoder(r.Body).Decode(&clientType)
+
+		if validUserEmail, ok := userEmail.(models.EmailType); ok {
+			changeUserType = models.ChangeUserType{clientType.ClientType, validUserEmail}
+			_ = changeUserType
+		} else {
+			return
+		}
+
 	}
 
 }

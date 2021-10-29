@@ -27,6 +27,7 @@ func main() {
 	r.HandleFunc("/signup", controllerIns.SignUp(db)).Methods("POST")
 	r.HandleFunc("/login", controllerIns.LogIn(db)).Methods("POST")
 	r.HandleFunc("/protected", controllerIns.TokenVerifyMiddleWare(controllerIns.ProtectedEndPoint())).Methods("GET")
+	r.HandleFunc("/changeutype", controllerIns.TokenVerifyMiddleWare(controllerIns.ChangeUserType(db))).Methods("POST")
 
 	fmt.Println("hello")
 
