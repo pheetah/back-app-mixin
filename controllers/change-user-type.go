@@ -12,7 +12,7 @@ import (
 func (c Controller) ChangeUserType(db *sql.DB) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		fmt.Println("user-type-changer service invoked!")
-		var changeUserType models.ChangeUserType
+		var changedUserType models.ChangeUserType
 
 		var clientType models.ChangeUserTypeBody
 
@@ -20,11 +20,13 @@ func (c Controller) ChangeUserType(db *sql.DB) http.HandlerFunc {
 		json.NewDecoder(r.Body).Decode(&clientType)
 
 		if validUserEmail, ok := userEmail.(models.EmailType); ok {
-			changeUserType = models.ChangeUserType{clientType.ClientType, validUserEmail}
-			_ = changeUserType
+			changedUserType = models.ChangeUserType{ClientType: clientType.ClientType, Email: validUserEmail}
+			//_ = changeUserType
 		} else {
 			return
 		}
+
+		json.NewEncoder(w).Encode(changedUserType)
 
 	}
 
