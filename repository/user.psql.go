@@ -2,6 +2,7 @@ package userRepository
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 
 	"github.com/eyupfatihersoy/app-tryout-1/models"
@@ -37,12 +38,16 @@ func (u UserRepository) LogIn(db *sql.DB, user models.User) (models.User, error)
 }
 
 func (u UserRepository) ChangeUserType(db *sql.DB, uType models.ChangeUserType) (models.ChangeUserType, error) {
-	row := db.QueryRow("update users set clientType=$1 where email=$2", uType.ClientType, uType.Email)
-	err := row.Scan(&uType.ClientType, &uType.Email)
+	result, err := db.Exec("update users set clientType=$1 where email=$2", uType.ClientType, uType.Email)
 
 	if err != nil {
 		return uType, err
 	}
+
+	rowsUpdated, err := result.RowsAffected()
+	logFatal(err)
+
+	fmt.Println("rows updated", rowsUpdated)
 
 	return uType, nil
 }
