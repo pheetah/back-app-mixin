@@ -35,3 +35,14 @@ func (u UserRepository) LogIn(db *sql.DB, user models.User) (models.User, error)
 
 	return user, nil
 }
+
+func (u UserRepository) ChangeUserType(db *sql.DB, uType models.ChangeUserType) (models.ChangeUserType, error) {
+	row := db.QueryRow("update users set clientType=$1 where email=$2", uType.ClientType, uType.Email)
+	err := row.Scan(&uType.ClientType, &uType.Email)
+
+	if err != nil {
+		return uType, err
+	}
+
+	return uType, nil
+}

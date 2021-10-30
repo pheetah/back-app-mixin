@@ -5,6 +5,6 @@ type ChangeUserType struct {
 	Email      EmailType  `json:"email"`
 }
 
-type ChangeUserTypeBody struct {
+type ChangeUserTypeRequestBody struct {
 	ClientType ClientType `json:"clientType"`
 }

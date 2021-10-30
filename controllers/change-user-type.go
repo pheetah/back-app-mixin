@@ -4,9 +4,12 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 
 	"github.com/eyupfatihersoy/app-tryout-1/models"
+	userRepository "github.com/eyupfatihersoy/app-tryout-1/repository"
+	"github.com/eyupfatihersoy/app-tryout-1/utils"
 )
 
 func (c Controller) ChangeUserType(db *sql.DB) http.HandlerFunc {
@@ -14,7 +17,7 @@ func (c Controller) ChangeUserType(db *sql.DB) http.HandlerFunc {
 		fmt.Println("user-type-changer service invoked!")
 		var changedUserType models.ChangeUserType
 
-		var clientType models.ChangeUserTypeBody
+		var clientType models.ChangeUserTypeRequestBody
 
 		userEmail := r.Context().Value(models.ContextKey)
 		json.NewDecoder(r.Body).Decode(&clientType)
@@ -26,7 +29,14 @@ func (c Controller) ChangeUserType(db *sql.DB) http.HandlerFunc {
 			return
 		}
 
-		json.NewEncoder(w).Encode(changedUserType)
+		userRepo := userRepository.UserRepository{}
+		changedType, err := userRepo.ChangeUserType(db, changedUserType)
+
+		if err != nil {
+			log.Fatal(err)
+		} else {
+			utils.ResponseJSON(w, changedType)
+		}
 
 	}
 
