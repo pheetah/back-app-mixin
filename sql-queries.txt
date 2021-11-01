@@ -6,3 +6,26 @@ create table users(
 );
 
 insert into users (email, password, clientType) values ('testexample@test.com', '12345', 'basic')
+
+CREATE TABLE favorites (
+  id  serial PRIMARY KEY, 
+  favtype text NOT NULL,
+  alias text,
+  date date NOT NULL DEFAULT CURRENT_DATE,
+  description text
+);
+
+insert into favorites (favtype, alias, date, description) values 
+('text', 'my favorite text', '2016-06-23', 'i like to add text to my favorites')
+
+CREATE TABLE user_favorites (
+  favorite_id int REFERENCES favorites (id) ON UPDATE CASCADE ON DELETE CASCADE, 
+  user_id int REFERENCES users (id) ON UPDATE CASCADE,
+  amount numeric NOT NULL DEFAULT 0,
+  CONSTRAINT user_favorite_id PRIMARY KEY (favorite_id, user_id)
+);
+
+insert into user_favorites (favorite_id, user_id, amount) values 
+(1, 1, 1)
+
+select * from user_favorites where user_id=1
