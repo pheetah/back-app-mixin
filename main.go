@@ -28,6 +28,7 @@ func main() {
 	r.HandleFunc("/login", controllerIns.LogIn(db)).Methods("POST")
 	r.HandleFunc("/protected", controllerIns.TokenVerifyMiddleWare(controllerIns.ProtectedEndPoint())).Methods("GET")
 	r.HandleFunc("/changeutype", controllerIns.TokenVerifyMiddleWare(controllerIns.ChangeUserType(db))).Methods("PUT")
+	r.HandleFunc("/addtofavorites/{id}", controllerIns.AddToFavorites(db)).Methods("POST")
 
 	fmt.Println("hello")
 
